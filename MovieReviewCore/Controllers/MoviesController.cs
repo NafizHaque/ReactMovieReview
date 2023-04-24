@@ -23,16 +23,16 @@ namespace MovieReviewCore.Controllers
 
         // GET: Movies
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<ActionResult<IEnumerable<Movie>>> Index()
         {
               return _context.Movie != null ? 
-                          View(await _context.Movie.ToListAsync()) :
+                          await _context.Movie.ToListAsync() :
                           Problem("Entity set 'AppDBContext.Movie'  is null.");
         }
 
         [HttpGet("{id}")]
         // GET: Movies/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<ActionResult<Movie>> Details(int? id)
         {
             if (id == null || _context.Movie == null)
             {
@@ -46,42 +46,36 @@ namespace MovieReviewCore.Controllers
                 return NotFound();
             }
 
-            return View(movie);
+            return movie;
         }
 
-        // POST: Movies/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("MovieId,Title,Description,Released,Rating")] Movie movie)
+        public async Task<ActionResult<Movie>> Create(Movie movie)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(movie);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return CreatedAtAction("Details", new { id = movie.MovieId }, movie);
             }
-            return View(movie);
+            return Problem("Malformed Data Entry");
         }
 
-        // POST: Movies/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
         [HttpPut("{id}")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("MovieId,Title,Description,Released,Rating")] Movie movie)
+        public async Task<IActionResult> Edit(int id, Movie movie)
         {
             if (id != movie.MovieId)
             {
-                return NotFound();
+                return Content("Bad request");
             }
+
+            _context.Entry(movie).State = EntityState.Modified;
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(movie);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -95,15 +89,13 @@ namespace MovieReviewCore.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return Content("Sucessful Edit");
             }
-            return View(movie);
+            return NoContent();
         }
 
-        // POST: Movies/Delete/5
         [HttpDelete("{id}")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<ActionResult<Movie>> Delete(int id)
         {
             if (_context.Movie == null)
             {
@@ -114,9 +106,9 @@ namespace MovieReviewCore.Controllers
             {
                 _context.Movie.Remove(movie);
             }
-            
+
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return Content("Sucessful Deletion");
         }
 
         private bool MovieExists(int id)
