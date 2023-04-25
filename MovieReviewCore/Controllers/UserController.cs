@@ -1,74 +1,72 @@
-﻿
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieReviewCore.Data;
 using MovieReviewCore.Models;
-using Microsoft.AspNetCore.Http;
-
 
 namespace MovieReviewCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MoviesController : Controller
+    public class UserController : ControllerBase
     {
         private readonly AppDBContext _context;
 
-        public MoviesController(AppDBContext context)
+        public UserController(AppDBContext context)
         {
             _context = context;
         }
 
-        // GET: Movies
+        // GET: User
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Movie>>> Index()
+        public async Task<ActionResult<IEnumerable<User>>> Index()
         {
             return _context.Movie != null ?
-                        await _context.Movie.ToListAsync() :
-                        Problem("Entity set 'AppDBContext.Movie'  is null.");
+                        await _context.User.ToListAsync() :
+                        Problem("Entity set 'AppDBContext.User'  is null.");
         }
 
         [HttpGet("{id}")]
-        // GET: Movies/Details/5
-        public async Task<ActionResult<Movie>> Details(int? id)
+        // GET: User/Details/5
+        public async Task<ActionResult<User>> Details(int? id)
         {
-            if (id == null || _context.Movie == null)
+            if (id == null || _context.User == null)
             {
                 return NotFound();
             }
 
-            var movie = await _context.Movie
-                .FirstOrDefaultAsync(m => m.MovieId == id);
-            if (movie == null)
+            var user = await _context.User
+                .FirstOrDefaultAsync(m => m.UserId == id);
+            if (user == null)
             {
                 return NotFound();
             }
 
-            return movie;
+            return user;
         }
 
         [HttpPost]
-        public async Task<ActionResult<Movie>> Create(Movie movie)
+        public async Task<ActionResult<Movie>> Create(User user)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(movie);
+                _context.Add(user);
                 await _context.SaveChangesAsync();
-                return CreatedAtAction("Details", new { id = movie.MovieId }, movie);
+                return CreatedAtAction("Details", new { id = user.UserId }, user);
             }
             return Problem("Malformed Data Entry");
         }
 
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Edit(int id, Movie movie)
+        public async Task<IActionResult> Edit(int id, User user)
         {
-            if (id != movie.MovieId)
+            if (id != user.UserId)
             {
                 return Content("Bad request");
             }
 
-            _context.Entry(movie).State = EntityState.Modified;
+            _context.Entry(user).State = EntityState.Modified;
 
             if (ModelState.IsValid)
             {
@@ -78,7 +76,7 @@ namespace MovieReviewCore.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!MovieExists(movie.MovieId))
+                    if (!UserExists(user.UserId))
                     {
                         return NotFound();
                     }
@@ -95,23 +93,23 @@ namespace MovieReviewCore.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<Movie>> Delete(int id)
         {
-            if (_context.Movie == null)
+            if (_context.User == null)
             {
-                return Problem("Entity set 'AppDBContext.Movie'  is null.");
+                return Problem("Entity set 'AppDBContext.User'  is null.");
             }
-            var movie = await _context.Movie.FindAsync(id);
-            if (movie != null)
+            var user = await _context.User.FindAsync(id);
+            if (user != null)
             {
-                _context.Movie.Remove(movie);
+                _context.User.Remove(user);
             }
 
             await _context.SaveChangesAsync();
             return Content("Sucessful Deletion");
         }
 
-        private bool MovieExists(int id)
+        private bool UserExists(int id)
         {
-            return (_context.Movie?.Any(e => e.MovieId == id)).GetValueOrDefault();
+            return (_context.User?.Any(e => e.UserId == id)).GetValueOrDefault();
         }
     }
 }
