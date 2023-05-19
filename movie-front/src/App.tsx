@@ -1,24 +1,27 @@
 import React from 'react';
-import { Route, Routes, BrowserRouter } from 'react-router-dom';
-import logo from './logo.svg';
+import { Route, RouterProvider, Routes, createBrowserRouter, createRoutesFromElements } from 'react-router-dom';
+//pages
 import Home from './pages/Home';
 import Movies from './pages/Movies';
-import Layout from './components/Layout';
+//layouts
+import RootLayout from './components/layouts/RootLayout';
+//css
 import './App.css';
+
+
+const router = createBrowserRouter(
+    createRoutesFromElements(
+      <Route path="/" element={<RootLayout />}>
+        <Route index element = {<Home />} />
+        <Route path='/movie' element = {<Movies />} />
+      </Route>
+    )
+)
+
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path='/' element = {<Home />} />
-        <Route path='/movie' element = {<Movies />} />
-
-        <Route path='/layout' element ={<Layout/>}>
-          <Route index  element = {<Home />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
-   
+    <RouterProvider router={router} />
   );
 }
 
